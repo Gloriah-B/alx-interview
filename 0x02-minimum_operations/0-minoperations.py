@@ -4,7 +4,7 @@ This module contains a function to calculate the minimum number of operations
 needed to achieve exactly n H characters in a file using 'Copy All' and 'Paste' operations.
 """
 
-def min_operations(n):
+def minOperations(n):
     """
     Calculate the fewest number of operations needed to result in exactly n H characters.
 
@@ -31,9 +31,3 @@ def min_operations(n):
         operations += n
 
     return operations
-
-# Example usage
-if __name__ == "__main__":
-    n = 9
-    print(min_operations(n))  # Output: 6
-
