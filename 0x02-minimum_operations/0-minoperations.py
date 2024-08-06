@@ -1,18 +1,20 @@
 #!/usr/bin/python3
 """
-This module contains a function to calculate the minimum number of operations 
-needed to achieve exactly n H characters in a file using 'Copy All' and 'Paste' operations.
+This module contains a function to calculate the minimum number of operations
+needed to achieve exactly n H characters in a file
+using 'Copy All' and 'Paste' operations.
 """
+
 
 def minOperations(n):
     """
-    Calculate the fewest number of operations needed to result in exactly n H characters.
+    Calculate fewest no. of operations needed to result in exactly n H chars
 
     Parameters:
     n (int): The target number of H characters.
 
     Returns:
-    int: The minimum number of operations needed to achieve n H characters. 
+    int: The minimum number of operations needed to achieve n H characters
          Returns 0 if n is impossible to achieve.
     """
     if n <= 1:
