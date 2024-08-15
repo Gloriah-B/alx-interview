@@ -1,44 +1,47 @@
 #!/usr/bin/python3
+"""Script that reads stdin line by line and computes metrics."""
+
 import sys
 
-def print_stats(status_codes, total_file_size):
-    """
-    Prints the accumulated metrics.
-    Args:
-        status_codes (dict): Dictionary of status codes.
-        total_file_size (int): Total size of all files.
-    """
-    print("File size: {}".format(total_file_size))
-    for key, val in sorted(status_codes.items()):
-        if val > 0:
-            print("{}: {}".format(key, val))
+# Initialize counters and tracking variables
+i = 0
+sum_file_size = 0
+status_code = {
+    '200': 0,
+    '301': 0,
+    '400': 0,
+    '401': 0,
+    '403': 0,
+    '404': 0,
+    '405': 0,
+    '500': 0
+}
 
-def main():
-    total_file_size = 0
-    counter = 0
-    status_codes = {"200": 0, "301": 0, "400": 0, "401": 0, "403": 0, "404": 0, "405": 0, "500": 0}
+def print_stats():
+    """Prints the accumulated metrics."""
+    print('File size: {:d}'.format(sum_file_size))
+    for key in sorted(status_code.keys()):
+        if status_code[key] > 0:
+            print('{}: {}'.format(key, status_code[key]))
 
-    try:
-        for line in sys.stdin:
-            parsed_line = line.split()[::-1]  # Trim and reverse the line parts
+try:
+    for line in sys.stdin:
+        args = line.split()
+        if len(args) > 2:
+            status_line = args[-2]
+            file_size = args[-1]
 
-            if len(parsed_line) > 2:
-                counter += 1
-                total_file_size += int(parsed_line[0])  # Extract file size
-                code = parsed_line[1]  # Extract status code
+            # Update metrics if the status code is valid
+            if status_line in status_code:
+                status_code[status_line] += 1
+            sum_file_size += int(file_size)
+            i += 1
 
-                if code in status_codes:
-                    status_codes[code] += 1
-
-                if counter == 10:
-                    print_stats(status_codes, total_file_size)
-                    counter = 0
-
-    except Exception:
-        pass
-    finally:
-        print_stats(status_codes, total_file_size)
-
-if __name__ == "__main__":
-    main()
-
+            # Print stats after every 10 lines
+            if i == 10:
+                print_stats()
+                i = 0
+except Exception:
+    pass
+finally:
+    print_stats()
