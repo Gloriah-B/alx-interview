@@ -1,63 +1,44 @@
 #!/usr/bin/python3
 import sys
-import signal
 
-
-def print_stats(total_size, status_codes):
-    """Prints the accumulated metrics."""
-    print("File size: {}".format(total_size))
-    for code in sorted(status_codes):
-        if status_codes[code] > 0:
-            print("{}: {}".format(code, status_codes[code]))
-
-
-def parse_line(line):
-    """Parses a log line and extracts the relevant information if it matches the format."""
-    try:
-        parts = line.split()
-        if len(parts) < 7:
-            return None, None
-
-        file_size = int(parts[-1])
-        status_code = parts[-2]
-
-        if status_code in ['200', '301', '400', '401', '403', '404', '405', '500']:
-            return file_size, status_code
-        else:
-            return None, None
-    except (IndexError, ValueError):
-        return None, None
-
+def print_stats(status_codes, total_file_size):
+    """
+    Prints the accumulated metrics.
+    Args:
+        status_codes (dict): Dictionary of status codes.
+        total_file_size (int): Total size of all files.
+    """
+    print("File size: {}".format(total_file_size))
+    for key, val in sorted(status_codes.items()):
+        if val > 0:
+            print("{}: {}".format(key, val))
 
 def main():
-    total_size = 0
-    status_codes = {code: 0 for code in ['200', '301', '400', '401', '403', '404', '405', '500']}
-    line_count = 0
-
-    def signal_handler(sig, frame):
-        """Handles the keyboard interruption signal (CTRL + C) and prints stats."""
-        print_stats(total_size, status_codes)
-        sys.exit(0)
-
-    signal.signal(signal.SIGINT, signal_handler)
+    total_file_size = 0
+    counter = 0
+    status_codes = {"200": 0, "301": 0, "400": 0, "401": 0, "403": 0, "404": 0, "405": 0, "500": 0}
 
     try:
         for line in sys.stdin:
-            file_size, status_code = parse_line(line)
-            if file_size is not None and status_code is not None:
-                total_size += file_size
-                status_codes[status_code] += 1
-            line_count += 1
+            parsed_line = line.split()[::-1]  # Trim and reverse the line parts
 
-            if line_count % 10 == 0:
-                print_stats(total_size, status_codes)
+            if len(parsed_line) > 2:
+                counter += 1
+                total_file_size += int(parsed_line[0])  # Extract file size
+                code = parsed_line[1]  # Extract status code
 
-    except KeyboardInterrupt:
-        print_stats(total_size, status_codes)
-        sys.exit(0)
+                if code in status_codes:
+                    status_codes[code] += 1
 
-    print_stats(total_size, status_codes)
+                if counter == 10:
+                    print_stats(status_codes, total_file_size)
+                    counter = 0
 
+    except Exception:
+        pass
+    finally:
+        print_stats(status_codes, total_file_size)
 
 if __name__ == "__main__":
     main()
+
