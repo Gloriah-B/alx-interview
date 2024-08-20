@@ -1,7 +1,11 @@
 #!/usr/bin/python3
+"""UTF-8 Validation"""
+
+
 def validUTF8(data):
     """
-    Determines if a given data set represents a valid UTF-8 encoding.
+    Method that determines if a given data set
+    represents a valid UTF-8 encoding.
 
     Args:
         data (list): A list of integers representing bytes.
@@ -9,30 +13,29 @@ def validUTF8(data):
     Returns:
         bool: True if the data is a valid UTF-8 encoding, otherwise False.
     """
-    n_bytes = 0
+    nbytes = 0
 
-    mask1 = 1 << 7  # 10000000
-    mask2 = 1 << 6  # 01000000
+    b1 = 1 << 7  # 10000000
+    b2 = 1 << 6  # 01000000
 
-    for num in data:
-        byte = num & 0xFF  # Isolate the 8 least significant bits
+    for i in data:
+        if nbytes == 0:
+            # Determine how many bytes are in the current UTF-8 character
+            b = 1 << 7
+            while b & i:
+                nbytes += 1
+                b >>= 1
 
-        if n_bytes == 0:
-            # Determine the number of bytes in the current UTF-8 character
-            while byte & mask1:
-                n_bytes += 1
-                byte <<= 1  # Left shift to check next bit
-
-            # UTF-8 characters can only be 1 to 4 bytes long
-            if n_bytes == 0:
+            # UTF-8 characters can be 1 to 4 bytes long
+            if nbytes == 0:
                 continue
-            if n_bytes == 1 or n_bytes > 4:
+            if nbytes == 1 or nbytes > 4:
                 return False
         else:
-            # Check that the next byte is a continuation byte (i.e., 10xxxxxx)
-            if not (byte & mask1 and not (byte & mask2)):
+            # Check that current byte is a valid continuation byte (10xxxxxx)
+            if not (i & b1 and not (i & b2)):
                 return False
 
-        n_bytes -= 1
+        nbytes -= 1
 
-    return n_bytes == 0
+    return nbytes == 0
